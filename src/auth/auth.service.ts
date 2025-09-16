@@ -14,18 +14,22 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
-  async register(email: string, password: string, name?: string) {
+  async register(email: string, password: string, name: string) {
     const exists = await this.users.findByEmail(email);
     if (exists) throw new ConflictException('Email já está em uso');
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await this.users.create({ email, name, passwordHash });
+    const user = await this.users.create({
+      email,
+      name,
+      password: passwordHash,
+    });
     return this.sign(user.id, user.email);
   }
 
   async login(email: string, password: string) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new UnauthorizedException('Credenciais inválidas');
-    const ok = await bcrypt.compare(password, user.passwordHash);
+    const ok = await bcrypt.compare(password, user.password);
     if (!ok) throw new UnauthorizedException('Credenciais inválidas');
     return this.sign(user.id, user.email);
   }
