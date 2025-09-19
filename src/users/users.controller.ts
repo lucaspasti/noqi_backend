@@ -1,11 +1,44 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { Prisma } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  me(@Req() req: any) {
-    return req.user; // retornaremos o payload validado
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post('register')
+  create(@Body() createUserDto: Prisma.UserCreateInput) {
+    return this.usersService.create(createUserDto);
+  }
+
+  @Get()
+  findAll() {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: number) {
+    return this.usersService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id') id: number,
+    @Body() updateUserDto: Prisma.UserUpdateInput,
+  ) {
+    return this.usersService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: number) {
+    return this.usersService.remove(id);
   }
 }
